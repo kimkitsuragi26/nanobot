@@ -62,6 +62,12 @@ class ExecTool(Tool):
                 "working_dir": {
                     "type": "string",
                     "description": "Optional working directory for the command"
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Per-call timeout in seconds (overrides default)",
+                    "minimum": 1,
+                    "maximum": 1800
                 }
             },
             "required": ["command"]
@@ -72,7 +78,9 @@ class ExecTool(Tool):
         guard_error = self._guard_command(command, cwd)
         if guard_error:
             return guard_error
-        
+
+        effective_timeout = kwargs.get("timeout", self.timeout)
+
         env = os.environ.copy()
         for key in self.env_strip:
             env.pop(key, None)
@@ -87,11 +95,11 @@ class ExecTool(Tool):
                 cwd=cwd,
                 env=env,
             )
-            
+
             try:
                 stdout, stderr = await asyncio.wait_for(
                     process.communicate(),
-                    timeout=self.timeout
+                    timeout=effective_timeout
                 )
             except asyncio.TimeoutError:
                 process.kill()
@@ -101,7 +109,7 @@ class ExecTool(Tool):
                     await asyncio.wait_for(process.wait(), timeout=5.0)
                 except asyncio.TimeoutError:
                     pass
-                return f"Error: Command timed out after {self.timeout} seconds"
+                return f"Error: Command timed out after {effective_timeout} seconds"
             
             output_parts = []
             
