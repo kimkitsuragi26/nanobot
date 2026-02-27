@@ -115,6 +115,8 @@ class AgentLoop:
             timeout=self.exec_config.timeout,
             restrict_to_workspace=self.restrict_to_workspace,
             path_append=self.exec_config.path_append,
+            max_output_chars=self.exec_config.max_output_chars,
+            env_strip=self.exec_config.env_strip,
         ))
         self.tools.register(WebSearchTool(config=self.search_config))
         self.tools.register(WebFetchTool())
