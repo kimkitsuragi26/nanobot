@@ -284,6 +284,7 @@ class WebSearchConfig(Base):
 
     api_key: str = ""  # Brave Search API key
     max_results: int = 5
+    provider: Literal["brave", "tavily"] = "brave"
 
 
 class WebToolsConfig(Base):
